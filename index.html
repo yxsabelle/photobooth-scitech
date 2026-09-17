@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>SciTech Photobooth — Society of Computing Technologists</title>
+<meta name="description" content="Official event photobooth for SciTech, the Society of Computing Technologists.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Decorative background layer, shared across screens -->
+<div class="bg-deco" aria-hidden="true">
+  <span class="deco deco-glow deco-glow-a"></span>
+  <span class="deco deco-glow deco-glow-b"></span>
+  <span class="deco deco-code deco-1">&lt;/&gt;</span>
+  <span class="deco deco-code deco-2">{ }</span>
+  <span class="deco deco-code deco-3">01</span>
+  <span class="deco deco-code deco-4">101</span>
+  <span class="deco deco-cursor deco-5">&#9998;</span>
+  <span class="deco deco-star deco-6">&#10022;</span>
+  <span class="deco deco-star deco-7">&#10022;</span>
+  <span class="deco deco-pixel deco-8"></span>
+  <span class="deco deco-pixel deco-9"></span>
+</div>
+
+<main id="app">
+
+  <!-- SCREEN 1: WELCOME -->
+  <section class="screen screen-welcome is-active" id="screen-welcome" aria-label="Welcome">
+    <div class="welcome-wrap">
+
+      <div class="logo-row" role="group" aria-label="Partner organizations">
+        <div class="logo-slot" id="logo-pcu" data-label="PCU">
+          <img src="logo/Philippine_Christian_University_logo.png" alt="PCU logo" onerror="this.parentElement.classList.add('logo-slot--empty')">
+        </div>
+        <div class="logo-slot" id="logo-coi" data-label="COI">
+          <img src="logo/Copy of SCITech_w_bg_removed.png" alt="Scitech logo" onerror="this.parentElement.classList.add('logo-slot--empty')">
+        </div>
+        <div class="logo-slot" id="logo-scitech" data-label="SciTech">
+          <img src="logo/COLLEGE LOGO.png" alt="COI logo" onerror="this.parentElement.classList.add('logo-slot--empty')">
+        </div>
+      </div>
+
+      <p class="eyebrow">Society of Computing Technologists</p>
+
+      <h1 class="welcome-title">
+        <span class="line">Make</span>
+        <span class="line line-accent">the moment<span class="blinker" aria-hidden="true">_</span></span>
+      </h1>
+
+      <p class="welcome-sub">A little photobooth built by BSCS, for every SciTech memory worth keeping.</p>
+
+      <button class="btn btn-primary btn-start" id="btn-start" type="button">
+        <span>Start</span>
+        <span class="arrow" aria-hidden="true">&#8594;</span>
+      </button>
+
+      <p class="welcome-footnote">Best experienced on the event iPad &middot; allow camera access when asked</p>
+    </div>
+  </section>
+
+  <!-- SCREEN 2: SETUP -->
+  <section class="screen screen-setup" id="screen-setup" aria-label="Photo setup">
+    <div class="panel">
+      <p class="step-label">01 / Setup</p>
+      <h2 class="panel-title">Choose your photo count.</h2>
+
+      <div class="choice-grid" role="group" aria-label="Number of photos">
+        <button class="choice-card is-selected" data-count="3" type="button">
+          <span class="choice-number">03</span>
+          <span class="choice-word">Photos</span>
+        </button>
+        <button class="choice-card" data-count="4" type="button">
+          <span class="choice-number">04</span>
+          <span class="choice-word">Photos</span>
+        </button>
+      </div>
+
+      <h3 class="panel-subtitle">Countdown</h3>
+      <div class="choice-row" role="group" aria-label="Countdown duration">
+        <button class="pill-choice" data-seconds="3" type="button">3s</button>
+        <button class="pill-choice is-selected" data-seconds="5" type="button">5s</button>
+        <button class="pill-choice" data-seconds="10" type="button">10s</button>
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-setup-back" type="button">
+          <span class="arrow" aria-hidden="true">&#8592;</span>
+          <span>Back</span>
+        </button>
+        <button class="btn btn-primary" id="btn-setup-continue" type="button">
+          <span>Continue</span>
+          <span class="arrow" aria-hidden="true">&#8594;</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: CAMERA -->
+  <section class="screen screen-camera" id="screen-camera" aria-label="Camera">
+    <div class="camera-wrap">
+      <div class="camera-head">
+        <p class="step-label">02 / Capture</p>
+        <p class="photo-counter" id="photo-counter">Photo 01 / 03</p>
+      </div>
+
+      <div class="stage" id="stage">
+        <video id="video" autoplay playsinline muted aria-label="Live camera preview"></video>
+        <canvas id="canvas" hidden></canvas>
+
+        <div class="flash" id="flash" aria-hidden="true"></div>
+
+        <div class="countdown-overlay" id="countdown-overlay" aria-live="polite">
+          <span class="countdown-number" id="countdown-number">3</span>
+        </div>
+
+        <div class="camera-message" id="camera-message" hidden role="alert">
+          <p class="camera-message-title">Camera access is required to take photos.</p>
+          <p class="camera-message-body">Please allow camera access in your browser settings, then reload this page. The photobooth must be opened over a secure (HTTPS) connection.</p>
+          <button class="btn btn-ghost" id="btn-camera-retry" type="button">Try again</button>
+        </div>
+
+        <div class="dots" id="dots" aria-hidden="true"></div>
+      </div>
+
+      <div class="camera-controls">
+        <button class="btn btn-ghost btn-icon" id="btn-flip" type="button" aria-label="Flip camera mirroring">
+          <span aria-hidden="true">&#8596;</span>
+          <span>Flip</span>
+        </button>
+
+        <button class="shutter-btn" id="btn-shutter" type="button" aria-label="Start countdown and take photo">
+          <span class="shutter-ring"></span>
+        </button>
+
+        <button class="btn btn-ghost" id="btn-camera-cancel" type="button">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: RESULT / EDIT -->
+  <section class="screen screen-result" id="screen-result" aria-label="Your photo strip">
+    <div class="result-wrap">
+      <p class="step-label">03 / Finish</p>
+      <h2 class="panel-title">Your photo strip.</h2>
+
+      <div class="result-body">
+        <div class="strip-preview-wrap">
+          <canvas id="strip-canvas" aria-label="Your generated photo strip preview"></canvas>
+        </div>
+
+        <div class="result-side">
+          <h3 class="panel-subtitle">Choose a frame</h3>
+          <div class="frame-grid" role="group" aria-label="Frame style">
+            <button class="frame-card is-selected" data-frame="tech" type="button">
+              <span class="frame-swatch frame-swatch-tech" aria-hidden="true"></span>
+              <span>Tech</span>
+            </button>
+            <button class="frame-card" data-frame="pink" type="button">
+              <span class="frame-swatch frame-swatch-pink" aria-hidden="true"></span>
+              <span>Pink</span>
+            </button>
+            <button class="frame-card" data-frame="grid" type="button">
+              <span class="frame-swatch frame-swatch-grid" aria-hidden="true"></span>
+              <span>Grid</span>
+            </button>
+            <button class="frame-card" data-frame="clean" type="button">
+              <span class="frame-swatch frame-swatch-clean" aria-hidden="true"></span>
+              <span>Clean</span>
+            </button>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn btn-primary btn-block" id="btn-download" type="button">
+              <span>Download</span>
+              <span class="arrow" aria-hidden="true">&#8595;</span>
+            </button>
+            <button class="btn btn-ghost btn-block" id="btn-retake" type="button">
+              <span class="arrow" aria-hidden="true">&#8630;</span>
+              <span>Retake</span>
+            </button>
+            <button class="btn btn-text btn-block" id="btn-new-session" type="button">Take new photos</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
