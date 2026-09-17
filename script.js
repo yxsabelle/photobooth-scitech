@@ -137,17 +137,60 @@
       return;
     }
 
-    try {
-      stopCamera(); // ensure no duplicate streams
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } },
-        audio: false,
-      });
-      state.stream = stream;
-      videoEl.srcObject = stream;
-      applyMirror();
-      await videoEl.play().catch(() => {});
-    } catch (err) {
+    stopCamera(); // ensure no duplicate streams
+
+    // Try with ideal constraints first, then fall back to plainer requests
+    // if the browser/device rejects them (this varies a lot across webcams).
+    const attempts = [
+      { video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false },
+      { video: { facingMode: "user" }, audio: false },
+      { video: true, audio: false },
+    ];
+
+    let lastErr = null;
+    for (const constraints of attempts) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        state.stream = stream;
+        videoEl.srcObject = stream;
+        applyMirror();
+        await videoEl.play().catch(() => {});
+        return; // success — stop trying further fallbacks
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+
+    // every attempt failed — show a message tailored to the actual error
+    console.error("Camera error:", lastErr && lastErr.name, lastErr && lastErr.message);
+    const name = lastErr ? lastErr.name : "";
+
+    if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+      showCameraError(
+        "Camera access is required to take photos.",
+        "Camera permission was denied. Click the camera or lock icon in your address bar, set Camera to \u201cAllow,\u201d then reload this page."
+      );
+    } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+      showCameraError(
+        "No camera was found.",
+        "This device doesn't seem to have a usable camera, or it isn't connected. Please check your camera and try again."
+      );
+    } else if (name === "NotReadableError" || name === "TrackStartError") {
+      showCameraError(
+        "The camera is already in use.",
+        "Close any other app or browser tab that might be using the camera (Zoom, Teams, another tab), then click Try again."
+      );
+    } else if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError") {
+      showCameraError(
+        "This camera doesn't support the requested settings.",
+        "Please try a different device or browser, or click Try again."
+      );
+    } else if (!window.isSecureContext) {
+      showCameraError(
+        "Camera access requires a secure connection.",
+        "Please open this photobooth over HTTPS (for example, a GitHub Pages link) rather than a plain http:// address."
+      );
+    } else {
       showCameraError(
         "Camera access is required to take photos.",
         "Please allow camera access in your browser settings, then reload this page. The photobooth must be opened through an HTTPS website."
